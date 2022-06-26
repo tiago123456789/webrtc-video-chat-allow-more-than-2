@@ -20,6 +20,15 @@ Instructions to running project locally:
 - Execute command **npm install** to install modules used in project
 - Execute command **npm run start:dev** to running application in address http://localhost:3000
 
+Instructions to deploy project heroku:
+=======================================
+- Create account in Heroku
+- Install Heroku cli your machine
+- Clone project
+- Execute command **heroku login** to login cli to after commands
+- Execute command **heroku git:remote -a name_project_heroku_here** this command create one alias named heroku in your list git remote registers
+- Execute command **git push heroku master** to send your code project to Heroku and Heroku start deploy your application.
+- Access panel do Heroku to get url the application
 
 Imagem explain how to work Webrtc:
 ===================================
