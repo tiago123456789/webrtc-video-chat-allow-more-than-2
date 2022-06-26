@@ -9,7 +9,7 @@ The project features:
 ---------------------
 - Mute or unmute mic
 - Disable or enable video
-- Room video chat can be more than 2 persons
+- Room video chat can have more than 2 persons
 - Share your screen com another persons in room.
 - Record video with your audio and video
 - Record video shared screen with audio
