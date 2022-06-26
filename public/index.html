@@ -34,15 +34,15 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" style="color: white" href="#">Share link</a>
+                        <a class="nav-link" id="share-link-room" style="color: white" href="#">Share link</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
     <section class="container-fluid">
-        <div class="row">
-            <div class="card" style="width: 25rem;" id="my-video">
+        <div class="row" id="container-participants" >
+            <div class="card col-md-4" style="width: 25rem;" id="my-video">
                 <div class="card-body">
                     <h3 class="text-center text-capitalize" id="local-username"></h3>
                     <video id="other-video-stream" class="flip" style="width: 100%;"></video>
@@ -62,9 +62,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <h3 class="text-center">Other participants</h3>
-        <div class="row" id="container-participants" >
             <!-- <div class="card" style="width: 25rem;">
                 <div class="card-body">
                     <video controls style="width: 100%;"></video>
@@ -81,8 +78,6 @@
                     </div>
                 </div>
             </div> -->
-
-            </div>
         </div>
     </section>
     <script src="/socket.io/socket.io.js"></script>

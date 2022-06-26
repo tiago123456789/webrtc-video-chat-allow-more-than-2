@@ -7,6 +7,15 @@ document.addEventListener("DOMContentLoaded", () => {
     let peers = [];
     let disableMic = false;
     let disableVideo = false;
+    let isExpand = false
+
+    if (!querystring.room) {
+        querystring.room = prompt("Type identification the room before come in")
+    }
+
+    if (!querystring.username) {
+        querystring.username = prompt("What's your username?")
+    }
 
     getUsersCameraAndAudio();
 
@@ -84,7 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function ifVideoNotExistCreateVideo(socketId) {
         const videoElement = document.getElementById(`${socketId}`);
         if (videoElement) {
-            console.log("ALREADY VIDEO ELEMENT")
             return;
         }
 
@@ -98,14 +106,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 <h3 class="text-center text-capitalize" id="${socketId}-username"></h3>
                 <video autoplay id="${socketId}" 
                 class="flip" style="width: 100%;"></video>
+                <div>
+                        <button id="${socketId}-expand" class="btn btn-sm btn-primary" 
+                            style="padding: 10px 15px">
+                            <i class="fa-solid fa-expand"></i>
+                        </button>
+                </div>
             </div>
         `;
 
         container.appendChild(newVideo)
+        document.querySelector(`#${socketId}-expand`)
+            .addEventListener("click", () => {
+                const cardParticipant = document.querySelector(`#${socketId}-video`)
+                const width = isExpand == true ? "25rem" : "75rem"
+                cardParticipant.setAttribute("style", `width: ${width};`)
+                isExpand = !isExpand;
+            })
     }
 
     async function startPeer(socketId, isCreateOffer, data) {
-        console.log("create peer connection " + data.username)
         peers[socketId] = new RTCPeerConnection({
             iceServers: [
                 {
@@ -123,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
         })
 
         if (localStream) {
-            console.log("adding track to peer " + data.username)
             localStream.getTracks().forEach(track => {
                 peers[socketId].addTrack(track, localStream);
             })
@@ -148,7 +167,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         peers[socketId].onicecandidate = ({ candidate }) => {
-            console.log("emmit ice candidate to peer of " + data.username)
             socket.emit('ice-candidates', { username: querystring.username, candidate: candidate, to: socketId, sender: socket.id });
         };
 
@@ -171,7 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         if (isCreateOffer) {
-            console.log("creating offer to " + data.username)
             const offer = await peers[socketId].createOffer()
             await peers[socketId].setLocalDescription(offer);
             socket.emit("create-offer", { ...data, username: querystring.username, offer, to: socketId, from: socket.id })
@@ -229,38 +246,38 @@ document.addEventListener("DOMContentLoaded", () => {
         location.href = "https://www.google.com.br"
     })
 
+    const shareLinkRoom = document.querySelector("#share-link-room")
+    shareLinkRoom.addEventListener("click", (event) => {
+        event.preventDefault();
+        confirm(`Copy this link: ${location.origin}/index.html?room=${querystring.room}`)
+    })
+
     socket.on("connect", () => {
         socket.on("new-user", async (data) => {
-            console.log(data.username + "  came in " + data.room + " " + querystring.username)
             socket.emit("newUserStart", { ...data, username: querystring.username, to: data.from })
             await startPeer(data.from, true, data)
         })
 
         socket.on("newUserStart", async (data) => {
-            console.log(data.username + " receive notification about came in " + data.room + " " + querystring.username)
             await startPeer(data.from, false, data)
         })
 
         socket.on("made-offer", async (data) => {
             if (data.offer) {
-                console.log("receive offer " + data.username)
                 await peers[data.from].setRemoteDescription(data.offer);
                 const answer = await peers[data.from].createAnswer()
                 await peers[data.from].setLocalDescription(answer)
-                console.log("creating answer to " + data.username)
                 socket.emit("create-answer", { username: querystring.username, answer, to: data.from, from: socket.id })
             }
         })
 
         socket.on("made-answer", async (data) => {
             if (data.answer) {
-                console.log("receive answer " + data.username)
                 await peers[data.from].setRemoteDescription(data.answer);
             }
         })
 
         socket.on('ice-candidates', async (data) => {
-            console.log("receive ice candidate of " + data.username)
             data.candidate ? await peers[data.sender].addIceCandidate(new RTCIceCandidate(data.candidate)) : '';
         });
 
