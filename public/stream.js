@@ -7,7 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let peers = [];
     let disableMic = false;
     let disableVideo = false;
-    let isExpand = false
+    let isExpand = false;
+    let chunks = [];
+    let mediaRecorder;
 
     if (!querystring.room) {
         querystring.room = prompt("Type identification the room before come in")
@@ -62,11 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function shareScreen() {
         return navigator.mediaDevices.getDisplayMedia({
             video: {
+                mediaSource: "screen",
                 cursor: "always",
-                height: 1000,
-                width: 1200
+                width: { ideal: 1920, max: 1920 },
+                height: { ideal: 1080, max: 1080 }
             },
-            audio: false
+            audio: true
         })
             .then(stream => {
                 localShareScreen = stream
@@ -250,6 +253,51 @@ document.addEventListener("DOMContentLoaded", () => {
     shareLinkRoom.addEventListener("click", (event) => {
         event.preventDefault();
         confirm(`Copy this link: ${location.origin}/index.html?room=${querystring.room}`)
+    })
+
+    const recordScreen = document.querySelector("#btn-record-screen")
+    const stopRecordScreen = document.querySelector("#btn-stop-record-screen")
+    recordScreen.addEventListener("click", (event) => {
+        event.preventDefault();
+        stopRecordScreen.setAttribute("style", "padding: 10px 15px;")
+        recordScreen.setAttribute("style", "display: none; padding: 10px 15px;")
+
+        if (localShareScreen) {
+            stream = new MediaStream([
+                localShareScreen.getVideoTracks()[0],
+                localStream.getAudioTracks()[0]
+            ]);
+            mediaRecorder = new MediaRecorder(stream);
+        } else {
+            mediaRecorder = new MediaRecorder(localStream);
+        }
+
+        mediaRecorder.start();
+        console.log("start media recorder")
+
+        mediaRecorder.ondataavailable = function (e) {
+            console.log("get chuncks")
+            chunks.push(e.data);
+        }
+
+        mediaRecorder.onstop = function (e) {
+            const blob = new Blob(chunks, { 'type': 'video/mp4; codecs=opus' });
+            chunks = [];
+            const recordURL = URL.createObjectURL(blob);
+            console.log(recordURL)
+            const downloadElement = document.createElement("a")
+            downloadElement.href = recordURL;
+            downloadElement.target = "_blank"
+            downloadElement.click();
+        }
+    })
+
+    stopRecordScreen.addEventListener("click", (event) => {
+        event.preventDefault();
+        console.log("stop media recorder")
+        mediaRecorder.stop();
+        stopRecordScreen.setAttribute("style", "display: none; padding: 10px 15px")
+        recordScreen.setAttribute("style", "padding: 10px 15px;")
     })
 
     socket.on("connect", () => {
