@@ -8,12 +8,20 @@ const io = require('socket.io')(server, {
     }
 });
 
+app.set("view engine", "ejs")
 app.use(express.static(path.resolve(__dirname, "..", "public")))
+
+app.get("/create-room", (request, response) => {
+    return response.render("createRoom")
+})
+
+app.get("/room", (request, response) => {
+    return response.render("room")
+})
 
 io.on('connection', socket => {
     socket.on("subscribe", async (data) => {
         await socket.join(data.room)
-        console.log(data.username + " subscribe in " + data.room + "" )
         socket.to(data.room).emit("new-user", { ...data, from: socket.id })
     })
 

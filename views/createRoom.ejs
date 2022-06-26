@@ -1,0 +1,24 @@
+<%- include('./partials/head.ejs') %>    
+
+<body>
+    <div class="container mt-3">
+        <div class="row">
+            <h1 class="text-center">Create Room</h1>
+            <form class="col-md-4 offset-md-4" method="get" action="/room">
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="form2Example1">Code room</label>
+                    <input type="text" id="form2Example1" name="room" class="form-control" />
+                </div>
+
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="form2Example2">Username</label>
+                    <input type="text" id="form2Example2" name="username" class="form-control" />
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mb-4">Come in</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
